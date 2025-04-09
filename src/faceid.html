@@ -193,9 +193,7 @@
         updateStatus('verification', 'success', 'Tekshiruv muvaffaqiyatli');
         showNotification('success', 'Identifikatsiya muvaffaqiyatli!');
         
-        // Simulate redirect after successful verification
         setTimeout(() => {
-          // In a real app, navigate to the next page or call an API
           window.electronAPI.verificationSuccess();
         }, 2000);
       } else {
@@ -213,9 +211,8 @@
       }
     }
     
-    // Retry face detection
     function retryFaceDetection() {
-      // Clear previous detection
+      // Clear previous detection 
       if (faceDetectionInterval) {
         clearInterval(faceDetectionInterval);
       }
@@ -232,16 +229,11 @@
       startFaceDetection();
     }
     
-    // Go back to welcome page
     function goBack() {
-      // Stop camera if active
       stopCamera();
-      
-      // Navigate back to welcome page
       window.electronAPI.goToWelcome();
     }
     
-    // Stop the camera stream
     function stopCamera() {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -255,7 +247,6 @@
       video.srcObject = null;
     }
     
-    // Update status indicators
     function updateStatus(type, state, message) {
       const statusElement = type === 'camera' ? cameraStatus : 
                            type === 'face' ? faceStatus : verificationStatus;
