@@ -6,7 +6,7 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -326,15 +326,15 @@ body {
   .card {
     padding: 20px;
   }
-  
+
   .camera-frame {
     height: 250px;
   }
-  
+
   .controls {
     flex-direction: column;
   }
-  
+
   .button {
     width: 100%;
   }
