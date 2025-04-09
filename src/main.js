@@ -30,20 +30,15 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
-      // Disable navigation features
       navigateOnDragDrop: false,
     },
     autoHideMenuBar: true,
-    // Disable resizing to prevent exiting fullscreen
     resizable: false,
     center: true,
     fullscreen: true,
-    // Prevent user from exiting fullscreen
     kiosk: true,
-    // Disable minimize, maximize buttons
     minimizable: false,
     maximizable: false,
-    // Always on top to prevent other windows from showing
     alwaysOnTop: true,
   });
 
@@ -55,12 +50,10 @@ function createMainWindow() {
     }
   });
 
-  // Prevent new windows from being created
   mainWindow.webContents.on("new-window", (event) => {
     event.preventDefault();
   });
 
-  // Keep focus on the app window
   mainWindow.on("blur", () => {
     mainWindow.focus();
   });
@@ -94,11 +87,6 @@ function createMainWindow() {
     return false;
   });
 
-  // Windows key (Super) registration removed as it causes errors
-  // globalShortcut.register("Super", () => {
-  //   return false;
-  // });
-
   mainWindow.on("closed", () => {
     globalShortcut.unregisterAll();
   });
@@ -125,6 +113,25 @@ ipcMain.handle("check-mac-exists", async () => {
     return response.data.is_exists;
   } catch {
     return false;
+  }
+});
+
+ipcMain.handle("update-user-mac", async (event, userPin) => {
+  try {
+    const macAddress = getEthernetMacAddress();
+    const response = await axios.post(`${API_URL}/update-user-mac`, {
+      user_pin: userPin,
+      mac: macAddress,
+    });
+    return {
+      success: response.data.success || false,
+      message: response.data.message || "Unknown error",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message || "Connection error",
+    };
   }
 });
 

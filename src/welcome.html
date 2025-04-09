@@ -140,11 +140,12 @@
         }, 1000);
       }
 
-      function goToFaceID() {
+      async function goToFaceID() {
         const pinflInput = document.getElementById("pinfl-input");
         const pinflValue = pinflInput.value.trim();
+        const pinflError = document.getElementById("pinfl-error");
 
-        document.getElementById("pinfl-error").textContent = "";
+        pinflError.textContent = "";
         pinflInput.classList.remove("error");
         pinflInput.setAttribute("aria-invalid", "false");
 
@@ -163,9 +164,50 @@
         buttonSpinner.classList.remove("hidden");
         loadingOverlay.classList.remove("hidden");
 
-        setTimeout(() => {
+        try {
+          const macExists = await window.electronAPI.checkMacExists();
+
+          if (!macExists && pinflValue) {
+            const result = await window.electronAPI.updateUserMac(pinflValue);
+
+            if (!result.success) {
+              pinflError.textContent =
+                result.message ||
+                "MAC ro'yxatdan o'tkazishda xatolik yuz berdi";
+              pinflInput.classList.add("error");
+              pinflInput.setAttribute("aria-invalid", "true");
+
+              button.disabled = false;
+              button.setAttribute("aria-disabled", "false");
+              buttonText.textContent = "Kirish";
+              buttonIcon.classList.remove("hidden");
+              buttonSpinner.classList.add("hidden");
+              loadingOverlay.classList.add("hidden");
+              return;
+            }
+
+            console.log("MAC successfully registered");
+          }
+
           window.electronAPI.goToFaceID();
-        }, 1000);
+        } catch (error) {
+          pinflError.textContent = "Xatolik yuz berdi. Qayta urinib ko'ring.";
+          pinflInput.classList.add("error");
+          pinflInput.setAttribute("aria-invalid", "true");
+
+          button.disabled = false;
+          button.setAttribute("aria-disabled", "false");
+          buttonText.textContent = "Kirish";
+          buttonIcon.classList.remove("hidden");
+          buttonSpinner.classList.add("hidden");
+          loadingOverlay.classList.add("hidden");
+          button.disabled = false;
+          button.setAttribute("aria-disabled", "false");
+          buttonText.textContent = "Kirish";
+          buttonIcon.classList.remove("hidden");
+          buttonSpinner.classList.add("hidden");
+          loadingOverlay.classList.add("hidden");
+        }
       }
 
       const pinflInput = document.getElementById("pinfl-input");
