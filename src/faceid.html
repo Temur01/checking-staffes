@@ -1,11 +1,351 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Face ID</title>
-  </head>
-  <body>
-    <h1>Face ID sahifasi</h1>
-    <p>Bu yerda kamerani ulab yuzni aniqlash joylashadi.</p>
-  </body>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face ID Verification</title>
+  <link rel="stylesheet" href="style/faceid.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Background container -->
+  <div class="background"></div>
+  
+  <div class="container">
+    <div class="card">
+      <!-- Header with logo -->
+      <div class="header">
+        <img src="asset/logo_uz.png" alt="Logo" class="logo">
+        <h1 class="title">Yuz orqali identifikatsiya</h1>
+      </div>
+      
+      <!-- Camera section -->
+      <div class="camera-container">
+        <div class="camera-frame">
+          <!-- Face outline overlay -->
+          <div class="face-outline">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <path d="M100,20 C60,20 20,60 20,100 C20,140 60,180 100,180 C140,180 180,140 180,100 C180,60 140,20 100,20 Z" fill="none" stroke="#1e3a8a" stroke-width="3" stroke-dasharray="10,5" class="face-path"/>
+            </svg>
+          </div>
+          <!-- Video element for camera -->
+          <video id="video" autoplay playsinline></video>
+          <!-- Canvas for processing frames -->
+          <canvas id="canvas" class="hidden"></canvas>
+        </div>
+        
+        <!-- Status indicators -->
+        <div class="status-container">
+          <div class="status-indicator">
+            <i class="fas fa-camera status-icon"></i>
+            <span class="status-text" id="camera-status">Kamera ishga tushirilmoqda...</span>
+          </div>
+          <div class="status-indicator">
+            <i class="fas fa-user status-icon"></i>
+            <span class="status-text" id="face-status">Yuzingizni kameraga qarating</span>
+          </div>
+          <div class="status-indicator">
+            <i class="fas fa-check-circle status-icon"></i>
+            <span class="status-text" id="verification-status">Tekshirilmoqda</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Controls -->
+      <div class="controls">
+        <button id="start-button" class="button primary-button">
+          <i class="fas fa-play"></i>
+          <span>Boshlash</span>
+        </button>
+        <button id="retry-button" class="button secondary-button hidden">
+          <i class="fas fa-redo"></i>
+          <span>Qayta urinish</span>
+        </button>
+        <button id="back-button" class="button secondary-button">
+          <i class="fas fa-arrow-left"></i>
+          <span>Orqaga</span>
+        </button>
+      </div>
+      
+      <!-- Instructions -->
+      <div class="instructions">
+        <h3><i class="fas fa-info-circle"></i> Ko'rsatmalar</h3>
+        <ul>
+          <li>Yuzingizni kamera markazida saqlang</li>
+          <li>Yorug'lik yetarli bo'lishiga ishonch hosil qiling</li>
+          <li>Ko'zoynaklar va boshqa to'siqlarni olib tashlang</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Notification for success/error -->
+  <div id="notification" class="notification hidden">
+    <i class="notification-icon"></i>
+    <span class="notification-message"></span>
+  </div>
+  
+  <script>
+    // DOM elements
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const startButton = document.getElementById('start-button');
+    const retryButton = document.getElementById('retry-button');
+    const backButton = document.getElementById('back-button');
+    const cameraStatus = document.getElementById('camera-status');
+    const faceStatus = document.getElementById('face-status');
+    const verificationStatus = document.getElementById('verification-status');
+    const notification = document.getElementById('notification');
+    
+    // State variables
+    let stream = null;
+    let isProcessing = false;
+    let faceDetectionInterval = null;
+    let verificationAttempts = 0;
+    const MAX_VERIFICATION_ATTEMPTS = 3;
+    
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set up event listeners
+      startButton.addEventListener('click', startFaceDetection);
+      retryButton.addEventListener('click', retryFaceDetection);
+      backButton.addEventListener('click', goBack);
+      
+      // Check for camera permissions on page load
+      checkCameraPermission();
+    });
+    
+    // Check if camera is available and permissions are granted
+    async function checkCameraPermission() {
+      try {
+        // Just check if we can access the camera
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const hasCamera = devices.some(device => device.kind === 'videoinput');
+        
+        if (!hasCamera) {
+          updateStatus('camera', 'error', 'Kamera topilmadi');
+          showNotification('error', 'Qurilmangizda kamera mavjud emas');
+          startButton.disabled = true;
+        } else {
+          updateStatus('camera', 'ready', 'Kamera tayyor');
+        }
+      } catch (error) {
+        console.error('Camera permission check error:', error);
+        updateStatus('camera', 'error', 'Kamera ruxsati berilmagan');
+        showNotification('error', 'Kameradan foydalanish uchun ruxsat bering');
+      }
+    }
+    
+    // Start the face detection process
+    async function startFaceDetection() {
+      if (isProcessing) return;
+      
+      try {
+        // Hide the start button and show retry button
+        startButton.classList.add('hidden');
+        retryButton.classList.remove('hidden');
+        
+        // Request camera access
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: 'user'
+          },
+          audio: false
+        });
+        
+        // Connect the stream to the video element
+        video.srcObject = stream;
+        updateStatus('camera', 'success', 'Kamera ishlamoqda');
+        
+        // Set up canvas for processing
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        
+        // Wait for video to start playing
+        await new Promise(resolve => {
+          video.onloadedmetadata = () => {
+            resolve();
+          };
+        });
+        
+        // Start face detection process
+        isProcessing = true;
+        updateStatus('face', 'processing', 'Yuz aniqlanmoqda...');
+        
+        // Simulate face detection (in a real app, use a face detection library)
+        simulateFaceDetection();
+        
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        updateStatus('camera', 'error', 'Kameraga ulanishda xatolik');
+        showNotification('error', 'Kameraga ulanib bo\'lmadi. Ruxsatlarni tekshiring.');
+        startButton.classList.remove('hidden');
+        retryButton.classList.add('hidden');
+      }
+    }
+    
+    // Simulate face detection (in a real app, use a face detection library)
+    function simulateFaceDetection() {
+      let detectionProgress = 0;
+      const detectionSteps = ['Yuz izlanmoqda...', 'Yuz aniqlandi', 'Yuz tekshirilmoqda...'];
+      
+      faceDetectionInterval = setInterval(() => {
+        detectionProgress++;
+        
+        if (detectionProgress === 1) {
+          updateStatus('face', 'processing', detectionSteps[0]);
+        } else if (detectionProgress === 3) {
+          updateStatus('face', 'success', detectionSteps[1]);
+        } else if (detectionProgress === 4) {
+          updateStatus('verification', 'processing', detectionSteps[2]);
+        } else if (detectionProgress === 7) {
+          clearInterval(faceDetectionInterval);
+          verifyFace();
+        }
+      }, 1000);
+    }
+    
+    // Simulate face verification (in a real app, use actual verification)
+    function verifyFace() {
+      verificationAttempts++;
+      
+      // Simulate verification success (80% chance of success)
+      const isSuccess = Math.random() < 0.8;
+      
+      if (isSuccess) {
+        // Verification successful
+        updateStatus('verification', 'success', 'Tekshiruv muvaffaqiyatli');
+        showNotification('success', 'Identifikatsiya muvaffaqiyatli!');
+        
+        // Simulate redirect after successful verification
+        setTimeout(() => {
+          // In a real app, navigate to the next page or call an API
+          window.electronAPI.verificationSuccess();
+        }, 2000);
+      } else {
+        // Verification failed
+        updateStatus('verification', 'error', 'Tekshiruv muvaffaqiyatsiz');
+        
+        if (verificationAttempts >= MAX_VERIFICATION_ATTEMPTS) {
+          showNotification('error', 'Maksimal urinishlar soni tugadi. Iltimos, boshqa usulda kiriting.');
+        } else {
+          showNotification('error', `Tekshiruv muvaffaqiyatsiz. Yana ${MAX_VERIFICATION_ATTEMPTS - verificationAttempts} ta urinish qoldi.`);
+          
+          // Allow retry
+          isProcessing = false;
+        }
+      }
+    }
+    
+    // Retry face detection
+    function retryFaceDetection() {
+      // Clear previous detection
+      if (faceDetectionInterval) {
+        clearInterval(faceDetectionInterval);
+      }
+      
+      // Reset status
+      updateStatus('face', 'waiting', 'Yuzingizni kameraga qarating');
+      updateStatus('verification', 'waiting', 'Tekshirilmoqda');
+      
+      // Hide notification
+      notification.classList.add('hidden');
+      
+      // Restart detection
+      isProcessing = false;
+      startFaceDetection();
+    }
+    
+    // Go back to welcome page
+    function goBack() {
+      // Stop camera if active
+      stopCamera();
+      
+      // Navigate back to welcome page
+      window.electronAPI.goToWelcome();
+    }
+    
+    // Stop the camera stream
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      
+      if (faceDetectionInterval) {
+        clearInterval(faceDetectionInterval);
+      }
+      
+      video.srcObject = null;
+    }
+    
+    // Update status indicators
+    function updateStatus(type, state, message) {
+      const statusElement = type === 'camera' ? cameraStatus : 
+                           type === 'face' ? faceStatus : verificationStatus;
+      
+      // Update status text
+      statusElement.textContent = message;
+      
+      // Update status icon and class
+      const statusIcon = statusElement.previousElementSibling;
+      statusElement.parentElement.className = 'status-indicator';
+      statusElement.parentElement.classList.add(state);
+      
+      // Update icon class based on state
+      if (state === 'success') {
+        statusIcon.className = 'fas fa-check-circle status-icon';
+      } else if (state === 'error') {
+        statusIcon.className = 'fas fa-times-circle status-icon';
+      } else if (state === 'processing') {
+        statusIcon.className = 'fas fa-spinner fa-spin status-icon';
+      } else {
+        // Default icons based on type
+        if (type === 'camera') statusIcon.className = 'fas fa-camera status-icon';
+        if (type === 'face') statusIcon.className = 'fas fa-user status-icon';
+        if (type === 'verification') statusIcon.className = 'fas fa-check-circle status-icon';
+      }
+    }
+    
+    // Show notification
+    function showNotification(type, message) {
+      const notificationIcon = notification.querySelector('.notification-icon');
+      const notificationMessage = notification.querySelector('.notification-message');
+      
+      // Set icon and class based on type
+      notification.className = 'notification';
+      notification.classList.add(type);
+      
+      if (type === 'success') {
+        notificationIcon.className = 'notification-icon fas fa-check-circle';
+      } else if (type === 'error') {
+        notificationIcon.className = 'notification-icon fas fa-exclamation-circle';
+      } else {
+        notificationIcon.className = 'notification-icon fas fa-info-circle';
+      }
+      
+      // Set message
+      notificationMessage.textContent = message;
+      
+      // Show notification
+      notification.classList.remove('hidden');
+      
+      // Auto-hide after 5 seconds for non-error notifications
+      if (type !== 'error') {
+        setTimeout(() => {
+          notification.classList.add('hidden');
+        }, 5000);
+      }
+    }
+    
+    // Clean up when page is unloaded
+    window.addEventListener('beforeunload', () => {
+      stopCamera();
+    });
+  </script>
+</body>
 </html>

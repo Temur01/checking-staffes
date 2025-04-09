@@ -3,6 +3,7 @@ const path = require('path');
 const os = require('os');
 
 let mainWindow;
+let currentPage = 'welcome';
 
 function getEthernetMacAddress() {
   const interfaces = os.networkInterfaces();
@@ -27,14 +28,66 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-    }
+    },
+    autoHideMenuBar: true,
+    resizable: true,
+    center: true,
+    fullscreen: true
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'welcome.html'));
+  loadPage('welcome');
+  
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (!url.startsWith('file://')) {
+      event.preventDefault();
+    }
+  });
+  
+  const { globalShortcut } = require('electron');
+  
+  globalShortcut.register('F11', () => {
+    const isFullScreen = mainWindow.isFullScreen();
+    mainWindow.setFullScreen(!isFullScreen);
+  });
+  
+  globalShortcut.register('Escape', () => {
+    if (mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
+    }
+  });
+  
+  mainWindow.on('closed', () => {
+    globalShortcut.unregisterAll();
+  });
+}
+
+function loadPage(pageName) {
+  if (!mainWindow) return;
+  
+  currentPage = pageName;
+  const pagePath = path.join(__dirname, `${pageName}.html`);
+  mainWindow.loadFile(pagePath);
 }
 
 ipcMain.handle('get-mac-address', async () => {
   return getEthernetMacAddress();
+});
+
+ipcMain.handle('go-to-faceid', () => {
+  loadPage('faceid');
+  return true;
+});
+
+ipcMain.handle('go-to-welcome', () => {
+  loadPage('welcome');
+  return true;
+});
+
+ipcMain.handle('verification-success', () => {
+  setTimeout(() => {
+    loadPage('welcome');
+  }, 2000);
+  return true;
 });
 
 app.whenReady().then(() => {

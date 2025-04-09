@@ -5,40 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Xush kelibsiz</title>
   <link rel="stylesheet" href="style/welcome.css">
-  <!-- Adding a font for better typography -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Adding fonts for better typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <!-- Background animation container -->
   <div class="background-animation"></div>
   
+
+
   <div class="container">
     <div class="card">
-      <!-- Logo -->
-      <img src="asset/logo_uz.png" alt="Logo" class="logo" />
+      <!-- Logo with enhanced styling -->
+      <div class="logo-container">
+        <img src="asset/logo_uz.png" alt="Logo" class="logo" />
+      </div>
+      
       <!-- Welcome message with animation -->
       <h2 class="welcome-text">Xush kelibsiz!</h2>
-      <!-- PINFL input field with label -->
+      <p class="welcome-subtitle">Tizimga kirish uchun PINFL raqamingizni kiriting</p>
+      
+      <!-- PINFL input field with enhanced label -->
       <div class="input-container">
-        <label for="pinfl-input" class="input-label">PINFL</label>
-        <input
-          type="text"
-          id="pinfl-input"
-          class="pinfl-input"
-          placeholder="PINFL kiriting (14 raqam)"
-          maxlength="14"
-          pattern="\d{14}"
-          required
-          aria-describedby="pinfl-error"
-          aria-required="true"
-        />
+        <label for="pinfl-input" class="input-label">
+          PINFL
+          <span class="input-tooltip" title="Shaxsiy identifikatsiya raqami">
+            <i class="fas fa-info-circle"></i>
+          </span>
+        </label>
+        <div class="input-wrapper">
+          <i class="fas fa-id-card input-icon"></i>
+          <input
+            type="text"
+            id="pinfl-input"
+            class="pinfl-input"
+            placeholder="PINFL kiriting (14 raqam)"
+            maxlength="14"
+            pattern="\d{14}"
+            required
+            aria-describedby="pinfl-error"
+            aria-required="true"
+          />
+        </div>
         <div class="error-message" id="pinfl-error" role="alert"></div>
       </div>
-      <!-- Interactive button -->
+      
+      <!-- Interactive button with icon -->
       <button class="button" onclick="goToFaceID()">
         <span class="button-text">Kirish</span>
-        <span class="button-spinner hidden"></span>
+        <i class="fas fa-arrow-right button-icon"></i>
+        <span class="button-spinner hidden"><i class="fas fa-spinner fa-spin"></i></span>
       </button>
+      
+      <!-- Loading overlay -->
+      <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+          <i class="fas fa-spinner fa-spin fa-3x"></i>
+          <p>Yuklanmoqda...</p>
+        </div>
+      </div>
+      
+
     </div>
   </div>
 
@@ -51,9 +80,14 @@
 
       // Check if PINFL is exactly 14 digits
       if (!/^\d{14}$/.test(pinflValue)) {
-        pinflError.textContent = 'PINFL 14 raqamdan iborat bo‘lishi kerak!';
+        pinflError.textContent = 'PINFL 14 raqamdan iborat bolishi kerak!';
         pinflInput.classList.add('error');
         pinflInput.setAttribute('aria-invalid', 'true');
+        // Add shake animation to input
+        pinflInput.classList.add('shake');
+        setTimeout(() => {
+          pinflInput.classList.remove('shake');
+        }, 500);
         return;
       }
 
@@ -62,21 +96,29 @@
       pinflInput.classList.remove('error');
       pinflInput.setAttribute('aria-invalid', 'false');
 
-      // Show loading state on button
+      // Show loading state on button and overlay
       const button = document.querySelector('.button');
       const buttonText = document.querySelector('.button-text');
+      const buttonIcon = document.querySelector('.button-icon');
       const buttonSpinner = document.querySelector('.button-spinner');
+      const loadingOverlay = document.getElementById('loading-overlay');
 
       button.disabled = true;
       button.setAttribute('aria-disabled', 'true');
-      buttonText.classList.add('hidden');
+      buttonText.textContent = 'Yuklanmoqda...';
+      buttonIcon.classList.add('hidden');
       buttonSpinner.classList.remove('hidden');
+      
+      // Show the loading overlay
+      loadingOverlay.classList.remove('hidden');
 
       // Simulate a delay for the loading state (replace with actual navigation)
       setTimeout(() => {
         window.electronAPI.goToFaceID();
       }, 1000);
     }
+    
+
 
     // Real-time validation for PINFL input
     document.getElementById('pinfl-input').addEventListener('input', function () {

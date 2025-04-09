@@ -16,16 +16,14 @@
     position: relative;
   }
   
-  /* Background animation with formal gradient */
+  /* Background with formal solid color */
   .background-animation {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(45deg, #1e3a8a, #4b5e7a, #1e3a8a, #4b5e7a);
-    background-size: 400%;
-    animation: bgAnimation 15s ease infinite;
+    background: #1e3a8a;
     z-index: -1;
   }
   
@@ -47,18 +45,20 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    height: 100vh;
     padding: 20px;
   }
   
   .card {
     background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     text-align: center;
     max-width: 450px;
     width: 100%;
     animation: fadeIn 0.5s ease-in-out;
+    margin: 0 auto;
   }
   
   /* Fade-in animation for the card */
@@ -74,12 +74,18 @@
   }
   
   /* Logo styling */
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  
   .logo {
     display: block;
-    margin: 0 auto 20px;
     max-width: 150px;
     height: auto;
     transition: transform 0.3s ease;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
   }
   
   .logo:hover {
@@ -88,10 +94,10 @@
   
   /* Welcome text with typing animation */
   .welcome-text {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #111827;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
     display: inline-block;
     overflow: hidden;
     white-space: nowrap;
@@ -116,42 +122,83 @@
   
   /* PINFL input styling */
   .input-container {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     text-align: left;
   }
   
   .input-label {
-    display: block;
+    display: flex;
+    align-items: center;
     font-size: 1rem;
     font-weight: 500;
     color: #111827;
     margin-bottom: 8px;
   }
   
+  .input-tooltip {
+    margin-left: 5px;
+    color: #6b7280;
+    cursor: help;
+  }
+  
+  .input-tooltip:hover {
+    color: #1e3a8a;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1.1rem;
+  }
+  
   .pinfl-input {
     width: 100%;
-    padding: 12px 15px;
-    font-size: 1rem;
+    padding: 10px 15px 10px 40px;
+    font-size: 0.95rem;
     font-family: 'Poppins', sans-serif;
-    border: 2px solid #d1d5db;
-    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
     outline: none;
     transition: all 0.3s ease;
   }
   
   .pinfl-input:focus {
     border-color: #1e3a8a;
-    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+    transform: none;
   }
   
-  .pinfl-input.error {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  .pinfl-input.valid {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+  
+  /* Shake animation for invalid input */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+  }
+  
+  .shake {
+    animation: shake 0.5s ease-in-out;
   }
   
   .pinfl-input:focus-visible {
     outline: 2px solid #1e3a8a;
     outline-offset: 2px;
+  }
+  
+  .pinfl-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
   }
   
   .error-message {
@@ -163,13 +210,13 @@
   
   /* Larger and centered button with formal color */
   .button {
-    padding: 18px 60px;
+    padding: 12px 40px;
     background: #1e3a8a;
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -178,13 +225,39 @@
     transition: all 0.3s ease;
     margin: 0 auto;
     width: 100%;
-    max-width: 300px;
+    max-width: 250px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+  }
+  
+  .button:hover::before {
+    left: 100%;
+  }
+  
+  .button-icon {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .button:hover .button-icon {
+    transform: translateX(5px);
   }
   
   .button:hover:not(:disabled) {
     background: #2b4ba1;
-    transform: scale(1.05);
-    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);
+    transform: none;
+    box-shadow: 0 2px 5px rgba(30, 58, 138, 0.2);
   }
   
   .button:active:not(:disabled) {
@@ -204,12 +277,9 @@
   
   /* Button spinner for loading state */
   .button-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #fff;
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+    display: inline-block;
+    color: white;
+    font-size: 18px;
   }
   
   @keyframes spin {
@@ -218,6 +288,64 @@
     }
     100% {
       transform: rotate(360deg);
+    }
+  }
+  
+
+  
+  /* Welcome subtitle */
+  .welcome-subtitle {
+    color: #6b7280;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+  }
+  
+
+  
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+  }
+  
+  .loading-content {
+    background-color: white;
+    padding: 30px 50px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 0.5s ease;
+  }
+  
+  .loading-content i {
+    color: #1e3a8a;
+    margin-bottom: 15px;
+  }
+  
+  .loading-content p {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 10px 0 0;
+    color: #333;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
   
