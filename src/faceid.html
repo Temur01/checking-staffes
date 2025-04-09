@@ -229,7 +229,7 @@
       async function verifyFaceWithAPI(imageBase64) {
         try {
           const result = await window.electronAPI.verifyFace(imageBase64);
-          const success = result.success === true;
+          const success = result.success_face === 1;
           verifyFace(success, result.message);
         } catch {
           verifyFace(false, "API bilan bog'lanishda xatolik");

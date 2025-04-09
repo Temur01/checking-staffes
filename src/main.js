@@ -30,11 +30,21 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      // Disable navigation features
+      navigateOnDragDrop: false,
     },
     autoHideMenuBar: true,
-    resizable: true,
+    // Disable resizing to prevent exiting fullscreen
+    resizable: false,
     center: true,
     fullscreen: true,
+    // Prevent user from exiting fullscreen
+    kiosk: true,
+    // Disable minimize, maximize buttons
+    minimizable: false,
+    maximizable: false,
+    // Always on top to prevent other windows from showing
+    alwaysOnTop: true,
   });
 
   loadPage("welcome");
@@ -43,6 +53,16 @@ function createMainWindow() {
     if (!url.startsWith("file://")) {
       event.preventDefault();
     }
+  });
+
+  // Prevent new windows from being created
+  mainWindow.webContents.on("new-window", (event) => {
+    event.preventDefault();
+  });
+
+  // Keep focus on the app window
+  mainWindow.on("blur", () => {
+    mainWindow.focus();
   });
 
   const { globalShortcut } = require("electron");
@@ -56,6 +76,26 @@ function createMainWindow() {
     if (mainWindow.isFullScreen()) {
       mainWindow.setFullScreen(false);
     }
+  });
+
+  globalShortcut.register("Alt+Tab", () => {
+    return false;
+  });
+
+  globalShortcut.register("Alt+F4", () => {
+    return false;
+  });
+
+  globalShortcut.register("CommandOrControl+Tab", () => {
+    return false;
+  });
+
+  globalShortcut.register("CommandOrControl+Shift+Tab", () => {
+    return false;
+  });
+
+  globalShortcut.register("Super", () => {
+    return false;
   });
 
   mainWindow.on("closed", () => {
@@ -103,9 +143,15 @@ ipcMain.handle("verify-face", async (event, imageBase64) => {
       image: imageBase64,
       mac: getEthernetMacAddress(),
     });
+
+    if (response.data.success_face === 1) {
+      setTimeout(() => {
+        app.quit();
+      }, 2000);
+    }
+
     return response.data;
-  } catch (error) {
-    console.error("Error verifying face:", error);
+  } catch {
     return { success: false, message: "Tekshirishda xatolik yuz berdi" };
   }
 });
