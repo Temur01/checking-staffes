@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   goToFaceID: () => ipcRenderer.invoke("go-to-faceid"),
   goToWelcome: () => ipcRenderer.invoke("go-to-welcome"),
 
+  verifyFace: (imageBase64) => ipcRenderer.invoke("verify-face", imageBase64),
   verificationSuccess: () => ipcRenderer.invoke("verification-success"),
 });

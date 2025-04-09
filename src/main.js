@@ -97,6 +97,19 @@ ipcMain.handle("go-to-welcome", () => {
   return true;
 });
 
+ipcMain.handle("verify-face", async (event, imageBase64) => {
+  try {
+    const response = await axios.post(`${API_URL}/check-face`, {
+      image: imageBase64,
+      mac: getEthernetMacAddress(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error verifying face:", error);
+    return { success: false, message: "Tekshirishda xatolik yuz berdi" };
+  }
+});
+
 ipcMain.handle("verification-success", () => {
   setTimeout(() => {
     loadPage("welcome");

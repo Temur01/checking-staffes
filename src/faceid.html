@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Face ID Verification</title>
+    <title>Face ID Aniqlash</title>
     <link rel="stylesheet" href="style/faceid.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
@@ -204,21 +204,47 @@
             updateStatus("face", "success", detectionSteps[1]);
           } else if (detectionProgress === 4) {
             updateStatus("verification", "processing", detectionSteps[2]);
+            captureImageAndVerify();
           } else if (detectionProgress === 7) {
             clearInterval(faceDetectionInterval);
-            verifyFace();
           }
         }, 1000);
       }
 
-      function verifyFace() {
-        verificationAttempts++;
+      function captureImageAndVerify() {
+        try {
+          const context = canvas.getContext("2d");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const isSuccess = Math.random() < 0.8;
+          const imageBase64 = canvas.toDataURL("image/jpeg").split(",")[1];
+
+          verifyFaceWithAPI(imageBase64);
+        } catch {
+          verifyFace(false, "Rasmni olishda xatolik yuz berdi");
+        }
+      }
+
+      async function verifyFaceWithAPI(imageBase64) {
+        try {
+          const result = await window.electronAPI.verifyFace(imageBase64);
+          const success = result.success === true;
+          verifyFace(success, result.message);
+        } catch {
+          verifyFace(false, "API bilan bog'lanishda xatolik");
+        }
+      }
+
+      function verifyFace(isSuccess, message) {
+        verificationAttempts++;
 
         if (isSuccess) {
           updateStatus("verification", "success", "Tekshiruv muvaffaqiyatli");
-          showNotification("success", "Identifikatsiya muvaffaqiyatli!");
+          showNotification(
+            "success",
+            message || "Identifikatsiya muvaffaqiyatli!",
+          );
 
           setTimeout(() => {
             window.electronAPI.verificationSuccess();
@@ -234,7 +260,8 @@
           } else {
             showNotification(
               "error",
-              `Tekshiruv muvaffaqiyatsiz. Yana ${MAX_VERIFICATION_ATTEMPTS - verificationAttempts} ta urinish qoldi.`,
+              message ||
+                `Tekshiruv muvaffaqiyatsiz. Yana ${MAX_VERIFICATION_ATTEMPTS - verificationAttempts} ta urinish qoldi.`,
             );
 
             isProcessing = false;
@@ -286,7 +313,6 @@
 
         const statusIcon = statusElement.previousElementSibling;
         statusElement.parentElement.className = "status-indicator";
-        r;
         statusElement.parentElement.classList.add(state);
 
         if (state === "success") {
