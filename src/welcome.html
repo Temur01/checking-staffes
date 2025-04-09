@@ -17,7 +17,6 @@
         <img src="asset/logo_uz.png" alt="Logo" class="logo" />
       </div>
       
-      <!-- Content for registered MAC address (only logo and button) -->
       <div id="registered-mac-content" class="hidden">
         <h2 class="welcome-text">Xush kelibsiz!</h2>
         <button class="button direct-login-button" onclick="directLogin()">
@@ -27,7 +26,6 @@
         </button>
       </div>
       
-      <!-- Content for unregistered MAC address (PINFL input) -->
       <div id="unregistered-mac-content">
         <h2 class="welcome-text">Xush kelibsiz!</h2>
         <p class="welcome-subtitle">Tizimga kirish uchun PINFL raqamingizni kiriting</p>
@@ -75,7 +73,6 @@
   </div>
 
   <script>
-    // Check MAC address on page load
     window.addEventListener('load', async () => {
       // Show loading overlay while checking MAC address
       const loadingOverlay = document.getElementById('loading-overlay');
