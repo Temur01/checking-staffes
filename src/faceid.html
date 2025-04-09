@@ -9,33 +9,26 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <!-- Background container -->
   <div class="background"></div>
   
   <div class="container">
     <div class="card">
-      <!-- Header with logo -->
       <div class="header">
         <img src="asset/logo_uz.png" alt="Logo" class="logo">
         <h1 class="title">Yuz orqali identifikatsiya</h1>
       </div>
       
-      <!-- Camera section -->
       <div class="camera-container">
         <div class="camera-frame">
-          <!-- Face outline overlay -->
           <div class="face-outline">
             <svg width="200" height="200" viewBox="0 0 200 200">
               <path d="M100,20 C60,20 20,60 20,100 C20,140 60,180 100,180 C140,180 180,140 180,100 C180,60 140,20 100,20 Z" fill="none" stroke="#1e3a8a" stroke-width="3" stroke-dasharray="10,5" class="face-path"/>
             </svg>
           </div>
-          <!-- Video element for camera -->
           <video id="video" autoplay playsinline></video>
-          <!-- Canvas for processing frames -->
           <canvas id="canvas" class="hidden"></canvas>
         </div>
         
-        <!-- Status indicators -->
         <div class="status-container">
           <div class="status-indicator">
             <i class="fas fa-camera status-icon"></i>
@@ -52,7 +45,6 @@
         </div>
       </div>
       
-      <!-- Controls -->
       <div class="controls">
         <button id="start-button" class="button primary-button">
           <i class="fas fa-play"></i>
@@ -68,7 +60,6 @@
         </button>
       </div>
       
-      <!-- Instructions -->
       <div class="instructions">
         <h3><i class="fas fa-info-circle"></i> Ko'rsatmalar</h3>
         <ul>
@@ -80,14 +71,12 @@
     </div>
   </div>
   
-  <!-- Notification for success/error -->
   <div id="notification" class="notification hidden">
     <i class="notification-icon"></i>
     <span class="notification-message"></span>
   </div>
   
   <script>
-    // DOM elements
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const startButton = document.getElementById('start-button');
@@ -98,28 +87,22 @@
     const verificationStatus = document.getElementById('verification-status');
     const notification = document.getElementById('notification');
     
-    // State variables
     let stream = null;
     let isProcessing = false;
     let faceDetectionInterval = null;
     let verificationAttempts = 0;
     const MAX_VERIFICATION_ATTEMPTS = 3;
     
-    // Initialize the page
     document.addEventListener('DOMContentLoaded', () => {
-      // Set up event listeners
       startButton.addEventListener('click', startFaceDetection);
       retryButton.addEventListener('click', retryFaceDetection);
       backButton.addEventListener('click', goBack);
       
-      // Check for camera permissions on page load
       checkCameraPermission();
     });
     
-    // Check if camera is available and permissions are granted
     async function checkCameraPermission() {
       try {
-        // Just check if we can access the camera
         const devices = await navigator.mediaDevices.enumerateDevices();
         const hasCamera = devices.some(device => device.kind === 'videoinput');
         
@@ -137,12 +120,10 @@
       }
     }
     
-    // Start the face detection process
     async function startFaceDetection() {
       if (isProcessing) return;
       
       try {
-        // Hide the start button and show retry button
         startButton.classList.add('hidden');
         retryButton.classList.remove('hidden');
         
@@ -156,27 +137,22 @@
           audio: false
         });
         
-        // Connect the stream to the video element
         video.srcObject = stream;
         updateStatus('camera', 'success', 'Kamera ishlamoqda');
         
-        // Set up canvas for processing
         const context = canvas.getContext('2d');
         canvas.width = video.videoWidth || 640;
         canvas.height = video.videoHeight || 480;
         
-        // Wait for video to start playing
         await new Promise(resolve => {
           video.onloadedmetadata = () => {
             resolve();
           };
         });
         
-        // Start face detection process
         isProcessing = true;
         updateStatus('face', 'processing', 'Yuz aniqlanmoqda...');
         
-        // Simulate face detection (in a real app, use a face detection library)
         simulateFaceDetection();
         
       } catch (error) {
@@ -188,7 +164,6 @@
       }
     }
     
-    // Simulate face detection (in a real app, use a face detection library)
     function simulateFaceDetection() {
       let detectionProgress = 0;
       const detectionSteps = ['Yuz izlanmoqda...', 'Yuz aniqlandi', 'Yuz tekshirilmoqda...'];
@@ -209,15 +184,12 @@
       }, 1000);
     }
     
-    // Simulate face verification (in a real app, use actual verification)
     function verifyFace() {
       verificationAttempts++;
       
-      // Simulate verification success (80% chance of success)
       const isSuccess = Math.random() < 0.8;
       
       if (isSuccess) {
-        // Verification successful
         updateStatus('verification', 'success', 'Tekshiruv muvaffaqiyatli');
         showNotification('success', 'Identifikatsiya muvaffaqiyatli!');
         
