@@ -78,11 +78,9 @@ ipcMain.handle('get-mac-address', async () => {
 ipcMain.handle('check-mac-exists', async () => {
   try {
     const macAddress = getEthernetMacAddress();
-    console.log("🚀 ~ file: main.js:81 ~ macAddress:", macAddress)
     const response = await axios.get(`${API_URL}/check-mac`, {
       params: { mac: macAddress }
     });
-    console.log("🚀 ~ file: main.js:81 ~ response:", response.data)
     return response.data.is_exists;
   } catch {
     return false; 

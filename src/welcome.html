@@ -88,8 +88,7 @@
           document.getElementById('unregistered-mac-content').classList.remove('hidden');
           document.getElementById('pinfl-input').focus();
         }
-      } catch (error) {
-        console.error('Error checking MAC address:', error);
+      } catch {
         document.getElementById('registered-mac-content').classList.add('hidden');
         document.getElementById('unregistered-mac-content').classList.remove('hidden');
       } finally {
