@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <title>Xush kelibsiz</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f3f4f6;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .button {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .mac {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #111827;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Xush kelibsiz!</h2>
+    <button class="button" onclick="goToFaceID()">Kirish</button>
+    <div class="mac" id="mac-address">Yuklanmoqda...</div>
+  </div>
+
+  <script>
+    // MAC manzilni yuklaymiz
+    window.electronAPI.getMacAddress().then((mac) => {
+      document.getElementById('mac-address').innerText = `MAC: ${mac}`;
+    });
+
+    function goToFaceID() {
+      window.electronAPI.goToFaceID();
+    }
+  </script>
+</body>
+</html>
