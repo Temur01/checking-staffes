@@ -17,38 +17,51 @@
         <img src="asset/logo_uz.png" alt="Logo" class="logo" />
       </div>
       
-      <h2 class="welcome-text">Xush kelibsiz!</h2>
-      <p class="welcome-subtitle">Tizimga kirish uchun PINFL raqamingizni kiriting</p>
-      
-      <div class="input-container">
-        <label for="pinfl-input" class="input-label">
-          PINFL
-          <span class="input-tooltip" title="Shaxsiy identifikatsiya raqami">
-            <i class="fas fa-info-circle"></i>
-          </span>
-        </label>
-        <div class="input-wrapper">
-          <i class="fas fa-id-card input-icon"></i>
-          <input
-            type="text"
-            id="pinfl-input"
-            class="pinfl-input"
-            placeholder="PINFL kiriting (14 raqam)"
-            maxlength="14"
-            pattern="\d{14}"
-            required
-            aria-describedby="pinfl-error"
-            aria-required="true"
-          />
-        </div>
-        <div class="error-message" id="pinfl-error" role="alert"></div>
+      <!-- Content for registered MAC address (only logo and button) -->
+      <div id="registered-mac-content" class="hidden">
+        <h2 class="welcome-text">Xush kelibsiz!</h2>
+        <button class="button direct-login-button" onclick="directLogin()">
+          <span class="button-text">Kirish</span>
+          <i class="fas fa-arrow-right button-icon"></i>
+          <span class="button-spinner hidden"><i class="fas fa-spinner fa-spin"></i></span>
+        </button>
       </div>
       
-      <button class="button" onclick="goToFaceID()">
-        <span class="button-text">Kirish</span>
-        <i class="fas fa-arrow-right button-icon"></i>
-        <span class="button-spinner hidden"><i class="fas fa-spinner fa-spin"></i></span>
-      </button>
+      <!-- Content for unregistered MAC address (PINFL input) -->
+      <div id="unregistered-mac-content">
+        <h2 class="welcome-text">Xush kelibsiz!</h2>
+        <p class="welcome-subtitle">Tizimga kirish uchun PINFL raqamingizni kiriting</p>
+        
+        <div class="input-container">
+          <label for="pinfl-input" class="input-label">
+            PINFL
+            <span class="input-tooltip" title="Shaxsiy identifikatsiya raqami">
+              <i class="fas fa-info-circle"></i>
+            </span>
+          </label>
+          <div class="input-wrapper">
+            <i class="fas fa-id-card input-icon"></i>
+            <input
+              type="text"
+              id="pinfl-input"
+              class="pinfl-input"
+              placeholder="PINFL kiriting (14 raqam)"
+              maxlength="14"
+              pattern="\d{14}"
+              required
+              aria-describedby="pinfl-error"
+              aria-required="true"
+            />
+          </div>
+          <div class="error-message" id="pinfl-error" role="alert"></div>
+        </div>
+        
+        <button class="button" onclick="goToFaceID()">
+          <span class="button-text">Kirish</span>
+          <i class="fas fa-arrow-right button-icon"></i>
+          <span class="button-spinner hidden"><i class="fas fa-spinner fa-spin"></i></span>
+        </button>
+      </div>
       
       <div id="loading-overlay" class="loading-overlay hidden">
         <div class="loading-content">
@@ -62,6 +75,58 @@
   </div>
 
   <script>
+    // Check MAC address on page load
+    window.addEventListener('load', async () => {
+      // Show loading overlay while checking MAC address
+      const loadingOverlay = document.getElementById('loading-overlay');
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        // Check if MAC address exists in the system
+        const macExists = await window.electronAPI.checkMacExists();
+        
+        // Show appropriate content based on MAC address check
+        if (macExists) {
+          // MAC exists - show only logo and login button
+          document.getElementById('registered-mac-content').classList.remove('hidden');
+          document.getElementById('unregistered-mac-content').classList.add('hidden');
+        } else {
+          // MAC doesn't exist - show PINFL input
+          document.getElementById('registered-mac-content').classList.add('hidden');
+          document.getElementById('unregistered-mac-content').classList.remove('hidden');
+          // Focus on PINFL input
+          document.getElementById('pinfl-input').focus();
+        }
+      } catch (error) {
+        console.error('Error checking MAC address:', error);
+        document.getElementById('registered-mac-content').classList.add('hidden');
+        document.getElementById('unregistered-mac-content').classList.remove('hidden');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    });
+    
+    // Direct login for registered MAC addresses
+    function directLogin() {
+      const button = document.querySelector('.direct-login-button');
+      const buttonText = button.querySelector('.button-text');
+      const buttonIcon = button.querySelector('.button-icon');
+      const buttonSpinner = button.querySelector('.button-spinner');
+      const loadingOverlay = document.getElementById('loading-overlay');
+
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+      buttonText.textContent = 'Yuklanmoqda...';
+      buttonIcon.classList.add('hidden');
+      buttonSpinner.classList.remove('hidden');
+      loadingOverlay.classList.remove('hidden');
+      
+      setTimeout(() => {
+        window.electronAPI.goToFaceID();
+      }, 1000);
+    }
+    
+    // PINFL validation and login for unregistered MAC addresses
     function goToFaceID() {
       const pinflInput = document.getElementById('pinfl-input');
       const pinflError = document.getElementById('pinfl-error');
@@ -82,10 +147,10 @@
       pinflInput.classList.remove('error');
       pinflInput.setAttribute('aria-invalid', 'false');
 
-      const button = document.querySelector('.button');
-      const buttonText = document.querySelector('.button-text');
-      const buttonIcon = document.querySelector('.button-icon');
-      const buttonSpinner = document.querySelector('.button-spinner');
+      const button = document.querySelector('#unregistered-mac-content .button');
+      const buttonText = button.querySelector('.button-text');
+      const buttonIcon = button.querySelector('.button-icon');
+      const buttonSpinner = button.querySelector('.button-spinner');
       const loadingOverlay = document.getElementById('loading-overlay');
 
       button.disabled = true;
@@ -94,14 +159,16 @@
       buttonIcon.classList.add('hidden');
       buttonSpinner.classList.remove('hidden');
       loadingOverlay.classList.remove('hidden');
+      
       setTimeout(() => {
         window.electronAPI.goToFaceID();
       }, 1000);
     }
     
-
-
-    document.getElementById('pinfl-input').addEventListener('input', function () {
+    // PINFL input validation
+    const pinflInput = document.getElementById('pinfl-input');
+    if (pinflInput) {
+      pinflInput.addEventListener('input', function () {
       const pinflError = document.getElementById('pinfl-error');
       const value = this.value.trim();
 
@@ -109,24 +176,24 @@
 
       if (value.length !== 14 || !/^\d{14}$/.test(value)) {
         this.classList.add('error');
-        pinflError.textContent = 'PINFL 14 raqamdan iborat bo‘lishi kerak!';
+        pinflError.textContent = 'PINFL 14 raqamdan iborat bolishi kerak!';
         this.setAttribute('aria-invalid', 'true');
       } else {
         this.classList.remove('error');
         pinflError.textContent = '';
         this.setAttribute('aria-invalid', 'false');
       }
-    });
+      });
+    }
 
-    window.addEventListener('load', () => {
-      document.getElementById('pinfl-input').focus();
-    });
-
-    document.getElementById('pinfl-input').addEventListener('keypress', (e) => {
+    // Enter key handling for PINFL input
+    if (pinflInput) {
+      pinflInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         goToFaceID();
       }
-    });
+      });
+    }
   </script>
 </body>
 </html>
