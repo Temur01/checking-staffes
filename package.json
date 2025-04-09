@@ -4,16 +4,33 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder",
+    "build": "node build.js",
     "prepare": "husky"
   },
+  "build": {
+    "appId": "com.argos.faceverification",
+    "productName": "Face Verification",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "artifactName": "${productName}.exe"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "asar": false
+  },
   "keywords": [],
-  "author": "",
+  "author": "Argos",
   "license": "ISC",
-  "description": "",
+  "description": "Face verification application",
   "devDependencies": {
     "electron": "^35.1.4",
     "electron-builder": "^26.0.12",
+    "fs-extra": "^11.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "prettier": "3.5.3"

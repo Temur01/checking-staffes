@@ -1,0 +1,22 @@
+appId: com.argos.faceverification
+productName: Face Verification
+directories:
+  output: dist
+  buildResources: build
+files:
+  - from: .
+    filter:
+      - package.json
+      - src/**/*
+electronVersion: 35.1.4
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  icon: src/asset/logo_uz.png
+  artifactName: ${productName}-Portable.exe
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+asar: true

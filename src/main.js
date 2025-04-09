@@ -94,9 +94,10 @@ function createMainWindow() {
     return false;
   });
 
-  globalShortcut.register("Super", () => {
-    return false;
-  });
+  // Windows key (Super) registration removed as it causes errors
+  // globalShortcut.register("Super", () => {
+  //   return false;
+  // });
 
   mainWindow.on("closed", () => {
     globalShortcut.unregisterAll();
