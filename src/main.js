@@ -2,22 +2,27 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const os = require('os');
 
-function getMacAddress() {
+let mainWindow;
+
+function getEthernetMacAddress() {
   const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      if (!iface.internal && iface.mac && iface.mac !== '00:00:00:00:00:00') {
-        return iface.mac;
-      }
+  const ifaceList = interfaces['Ethernet']; 
+
+  if (!ifaceList) {
+    return 'Ethernet interfeysi topilmadi';
+  }
+
+  for (const iface of ifaceList) {
+    if (!iface.internal && iface.mac && iface.mac !== '00:00:00:00:00:00') {
+      return iface.mac;
     }
   }
-  return 'MAC address topilmadi';
+
+  return 'Ethernet MAC topilmadi';
 }
 
-let win;
-
-function createWindow() {
-  win = new BrowserWindow({
+function createMainWindow() {
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -25,16 +30,25 @@ function createWindow() {
     }
   });
 
-  win.loadFile(path.join(__dirname, 'welcome.html'));
+  mainWindow.loadFile(path.join(__dirname, 'welcome.html'));
 }
 
-// Renderer dan so‘rov kelsa, MAC manzilni qaytaramiz
 ipcMain.handle('get-mac-address', async () => {
-  return getMacAddress();
+  return getEthernetMacAddress();
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createMainWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createMainWindow();
+    }
+  });
+});
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
