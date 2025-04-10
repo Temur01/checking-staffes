@@ -192,6 +192,26 @@ ipcMain.handle("user-exit", async (event, imageBase64) => {
   }
 });
 
+ipcMain.handle("insert-other-user", async () => {
+  try {
+    const macAddress = getEthernetMacAddress();
+    const response = await axios.post(`${API_URL}/insert-other-user`, {
+      mac: macAddress,
+    });
+
+    if (response.data && response.data.success_face === 1) {
+      app.quit();
+    }
+
+    return response.data;
+  } catch {
+    return {
+      success: false,
+      message: "Boshqa foydalanuvchi qo'shishda xatolik",
+    };
+  }
+});
+
 ipcMain.handle("verification-success", () => {
   setTimeout(() => {
     loadPage("faceid");

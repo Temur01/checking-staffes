@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   checkTodayIsComing: () => ipcRenderer.invoke("check-today-is-coming"),
   userExit: (imageBase64) => ipcRenderer.invoke("user-exit", imageBase64),
+  insertOtherUser: () => ipcRenderer.invoke("insert-other-user"),
 });

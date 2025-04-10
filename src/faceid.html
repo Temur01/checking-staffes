@@ -99,6 +99,29 @@
       <span class="notification-message"></span>
     </div>
 
+    <!-- Modal for Other User Confirmation -->
+    <div id="other-user-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Diqqat!</h2>
+        </div>
+        <div class="modal-body">
+          <p>Siz kompyuterga boshqa odam sifatida kirishga rozimisiz?</p>
+          <p>Agar bu orqali kirsangiz, siz FaceID'dan o'tmagan bo'lasiz.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-other-user" class="button primary-button">
+            <i class="fas fa-check"></i>
+            <span>Roziman</span>
+          </button>
+          <button id="cancel-other-user" class="button secondary-button">
+            <i class="fas fa-times"></i>
+            <span>Orqaga</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
@@ -110,6 +133,9 @@
       const faceStatus = document.getElementById("face-status");
       const verificationStatus = document.getElementById("verification-status");
       const notification = document.getElementById("notification");
+      const otherUserModal = document.getElementById("other-user-modal");
+      const confirmOtherUserBtn = document.getElementById("confirm-other-user");
+      const cancelOtherUserBtn = document.getElementById("cancel-other-user");
 
       let stream = null;
       let isProcessing = false;
@@ -121,8 +147,10 @@
       document.addEventListener("DOMContentLoaded", () => {
         startButton.addEventListener("click", startFaceDetection);
         retryButton.addEventListener("click", retryFaceDetection);
-        otherPersonButton.addEventListener("click", switchToOtherPerson);
+        otherPersonButton.addEventListener("click", showOtherPersonModal);
         backButton.addEventListener("click", goBack);
+        confirmOtherUserBtn.addEventListener("click", confirmOtherPerson);
+        cancelOtherUserBtn.addEventListener("click", cancelOtherPerson);
 
         checkUserStatus();
 
@@ -336,13 +364,11 @@
 
       async function verifyFaceWithAPI(imageBase64) {
         try {
-          // Show notification when sending API request
           showNotification("info", "API so'rov yuborilmoqda...");
 
           const result = await window.electronAPI.verifyFace(imageBase64);
           const success = result.success_face === 1;
 
-          // Hide notification after receiving response
           const notificationElement = document.getElementById("notification");
           if (notificationElement) {
             notificationElement.classList.add("hidden");
@@ -365,7 +391,7 @@
 
             const welcomeMessage = document.createElement("h2");
             welcomeMessage.className = "welcome-message";
-            welcomeMessage.textContent = "TASDIQLANDI";
+            welcomeMessage.textContent = "Tasdiqlandi";
             welcomeContainer.appendChild(welcomeMessage);
 
             const infoContainer = document.createElement("div");
@@ -461,7 +487,41 @@
         window.electronAPI.goToWelcome();
       }
 
-      function switchToOtherPerson() {
+      function showOtherPersonModal() {
+        otherUserModal.classList.remove("hidden");
+      }
+
+      function cancelOtherPerson() {
+        otherUserModal.classList.add("hidden");
+      }
+
+      async function confirmOtherPerson() {
+        otherUserModal.classList.add("hidden");
+        try {
+          showNotification(
+            "info",
+            "Boshqa foydalanuvchi so'rovi yuborilmoqda...",
+          );
+
+          const result = await window.electronAPI.insertOtherUser();
+
+          if (result && result.success_face === 1) {
+            showNotification(
+              "success",
+              "Boshqa foydalanuvchi so'rovi yuborildi",
+            );
+            // App will quit automatically from main process
+          } else {
+            showNotification("error", result.message || "Xatolik yuz berdi");
+            fallbackToWelcomePage();
+          }
+        } catch (error) {
+          showNotification("error", "Xatolik yuz berdi");
+          fallbackToWelcomePage();
+        }
+      }
+
+      function fallbackToWelcomePage() {
         stopCamera();
         verificationAttempts = 0;
 
@@ -482,7 +542,7 @@
         document.querySelector(".instructions").style.display = "";
 
         checkCameraPermission();
-        checkCameraPermission();
+        window.electronAPI.goToWelcome();
       }
 
       function stopCamera() {
