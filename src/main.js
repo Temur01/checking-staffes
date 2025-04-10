@@ -168,9 +168,27 @@ ipcMain.handle("check-today-is-coming", async () => {
       params: { mac: macAddress },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error checking today-is-coming:", error);
+  } catch {
     return { message: "Error", data: false };
+  }
+});
+
+ipcMain.handle("user-exit", async (event, imageBase64) => {
+  try {
+    const response = await axios.post(`${API_URL}/user-exit`, {
+      image: imageBase64,
+      mac: getEthernetMacAddress(),
+    });
+
+    if (response.data.success_face === 1) {
+      setTimeout(() => {
+        app.quit();
+      }, 4000);
+    }
+
+    return response.data;
+  } catch {
+    return { success: false, message: "Tekshirishda xatolik yuz berdi" };
   }
 });
 
