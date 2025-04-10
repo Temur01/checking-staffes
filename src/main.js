@@ -61,14 +61,13 @@ function createMainWindow() {
   const { globalShortcut } = require("electron");
 
   globalShortcut.register("F11", () => {
-    const isFullScreen = mainWindow.isFullScreen();
-    mainWindow.setFullScreen(!isFullScreen);
+    // Disabled to prevent screen changes
+    return false;
   });
 
   globalShortcut.register("Escape", () => {
-    if (mainWindow.isFullScreen()) {
-      mainWindow.setFullScreen(false);
-    }
+    // Disabled to prevent exiting fullscreen
+    return false;
   });
 
   globalShortcut.register("Alt+Tab", () => {
