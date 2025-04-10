@@ -67,11 +67,15 @@
         <div class="controls">
           <button id="start-button" class="button primary-button">
             <i class="fas fa-play"></i>
-            <span>Boshlash</span>
+            <span>Kirish</span>
           </button>
           <button id="retry-button" class="button secondary-button hidden">
             <i class="fas fa-redo"></i>
             <span>Qayta urinish</span>
+          </button>
+          <button id="other-person-button" class="button secondary-button">
+            <i class="fas fa-user-plus"></i>
+            <span>Boshqa odam</span>
           </button>
           <button id="back-button" class="button secondary-button">
             <i class="fas fa-arrow-left"></i>
@@ -90,16 +94,12 @@
       </div>
     </div>
 
-    <div id="notification" class="notification hidden">
-      <i class="notification-icon"></i>
-      <span class="notification-message"></span>
-    </div>
-
     <script>
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
       const startButton = document.getElementById("start-button");
       const retryButton = document.getElementById("retry-button");
+      const otherPersonButton = document.getElementById("other-person-button");
       const backButton = document.getElementById("back-button");
       const cameraStatus = document.getElementById("camera-status");
       const faceStatus = document.getElementById("face-status");
@@ -115,6 +115,7 @@
       document.addEventListener("DOMContentLoaded", () => {
         startButton.addEventListener("click", startFaceDetection);
         retryButton.addEventListener("click", retryFaceDetection);
+        otherPersonButton.addEventListener("click", switchToOtherPerson);
         backButton.addEventListener("click", goBack);
 
         checkCameraPermission();
@@ -240,22 +241,46 @@
             const welcomeContainer = document.createElement("div");
             welcomeContainer.className = "welcome-container";
 
-            const fullnameDisplay = document.createElement("p");
-            const timeDisplay = document.createElement("p");
-            fullnameDisplay.className = "fullname-display";
-            fullnameDisplay.textContent = `F.I.O: ${result.fullname || ""}`;
-            timeDisplay.className = "time-display";
-            timeDisplay.textContent = `Ishga kelgan vaqt: ${new Date().toLocaleTimeString(
-              [],
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              },
-            )}`;
+            const successIcon = document.createElement("div");
+            successIcon.className = "success-icon";
+            successIcon.innerHTML = '<i class="fas fa-id-badge"></i>';
+            welcomeContainer.appendChild(successIcon);
 
-            welcomeContainer.appendChild(fullnameDisplay);
-            welcomeContainer.appendChild(timeDisplay);
+            const welcomeMessage = document.createElement("h2");
+            welcomeMessage.className = "welcome-message";
+            welcomeMessage.textContent = "TASDIQLANDI";
+            welcomeContainer.appendChild(welcomeMessage);
+
+            const infoContainer = document.createElement("div");
+            infoContainer.className = "info-container";
+
+            const fullnameDisplay = document.createElement("div");
+            fullnameDisplay.className = "info-item";
+            fullnameDisplay.innerHTML = `<i class="fas fa-user info-icon"></i><span class="info-label">F.I.O:</span> <span class="info-value">${result.fullname || ""}</span>`;
+
+            const timeDisplay = document.createElement("div");
+            timeDisplay.className = "info-item";
+            const currentTime = new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            });
+            timeDisplay.innerHTML = `<i class="fas fa-clock info-icon"></i><span class="info-label">Ishga kelgan vaqt:</span> <span class="info-value">${currentTime}</span>`;
+
+            const dateDisplay = document.createElement("div");
+            dateDisplay.className = "info-item";
+            const currentDate = new Date().toLocaleDateString([], {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+            dateDisplay.innerHTML = `<i class="fas fa-calendar-alt info-icon"></i><span class="info-label">Sana:</span> <span class="info-value">${currentDate}</span>`;
+
+            infoContainer.appendChild(fullnameDisplay);
+            infoContainer.appendChild(timeDisplay);
+            infoContainer.appendChild(dateDisplay);
+
+            welcomeContainer.appendChild(infoContainer);
 
             const card = document.querySelector(".card");
             card.appendChild(welcomeContainer);
@@ -317,6 +342,30 @@
       function goBack() {
         stopCamera();
         window.electronAPI.goToWelcome();
+      }
+
+      function switchToOtherPerson() {
+        stopCamera();
+        verificationAttempts = 0;
+
+        startButton.classList.remove("hidden");
+        retryButton.classList.add("hidden");
+
+        updateStatus("camera", "waiting", "Kamera ishga tushirilmoqda...");
+        updateStatus("face", "waiting", "Yuzingizni kameraga qarating");
+        updateStatus("verification", "waiting", "Tekshirilmoqda");
+
+        const welcomeContainer = document.querySelector(".welcome-container");
+        if (welcomeContainer) {
+          welcomeContainer.remove();
+        }
+
+        document.querySelector(".camera-container").style.display = "";
+        document.querySelector(".controls").style.display = "";
+        document.querySelector(".instructions").style.display = "";
+
+        checkCameraPermission();
+        checkCameraPermission();
       }
 
       function stopCamera() {
