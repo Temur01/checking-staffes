@@ -230,6 +230,31 @@
         try {
           const result = await window.electronAPI.verifyFace(imageBase64);
           const success = result.success_face === 1;
+
+          if (success) {
+            stopCamera();
+            document.querySelector(".camera-container").style.display = "none";
+            document.querySelector(".controls").style.display = "none";
+            document.querySelector(".instructions").style.display = "none";
+
+            const welcomeContainer = document.createElement("div");
+            welcomeContainer.className = "welcome-container";
+
+            const welcomeMessage = document.createElement("h2");
+            welcomeMessage.className = "welcome-message";
+            welcomeMessage.textContent = "Xush kelibsiz";
+
+            const fullnameDisplay = document.createElement("p");
+            fullnameDisplay.className = "fullname-display";
+            fullnameDisplay.textContent = `F.I.O: ${result.fullname || ""}`;
+
+            welcomeContainer.appendChild(welcomeMessage);
+            welcomeContainer.appendChild(fullnameDisplay);
+
+            const card = document.querySelector(".card");
+            card.appendChild(welcomeContainer);
+          }
+
           verifyFace(success, result.message);
         } catch {
           verifyFace(false, "API bilan bog'lanishda xatolik");

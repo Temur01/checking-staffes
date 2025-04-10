@@ -155,7 +155,7 @@ ipcMain.handle("verify-face", async (event, imageBase64) => {
     if (response.data.success_face === 1) {
       setTimeout(() => {
         app.quit();
-      }, 2000);
+      }, 5000);
     }
 
     return response.data;
