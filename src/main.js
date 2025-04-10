@@ -61,12 +61,10 @@ function createMainWindow() {
   const { globalShortcut } = require("electron");
 
   globalShortcut.register("F11", () => {
-    // Disabled to prevent screen changes
     return false;
   });
 
   globalShortcut.register("Escape", () => {
-    // Disabled to prevent exiting fullscreen
     return false;
   });
 
