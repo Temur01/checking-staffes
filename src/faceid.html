@@ -94,6 +94,11 @@
       </div>
     </div>
 
+    <div id="notification" class="notification hidden" style="display: none">
+      <i class="notification-icon fas fa-info-circle"></i>
+      <span class="notification-message"></span>
+    </div>
+
     <script>
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
@@ -127,6 +132,7 @@
       async function checkUserStatus() {
         try {
           const response = await window.electronAPI.checkTodayIsComing();
+          console.log("API Response:", response);
 
           if (response && response.data === true) {
             isUserComingIn = false;
@@ -135,9 +141,11 @@
             isUserComingIn = true;
             startButton.querySelector("span").textContent = "Kirish";
           }
-        } catch {
+        } catch (error) {
+          console.error("Error checking user status:", error);
           isUserComingIn = true;
           startButton.querySelector("span").textContent = "Kirish";
+          showNotification("error", "API bilan bog'lanishda xatolik yuz berdi");
         }
       }
 
@@ -253,8 +261,18 @@
 
       async function userExitWithAPI(imageBase64) {
         try {
+          // Show notification when sending API request
+          showNotification("info", "API so'rov yuborilmoqda...");
+
           const result = await window.electronAPI.userExit(imageBase64);
           const success = result.success_face === 1;
+
+          // Hide notification after receiving response
+          const notificationElement = document.getElementById("notification");
+          if (notificationElement) {
+            notificationElement.classList.add("hidden");
+            notificationElement.style.display = "none";
+          }
 
           if (success) {
             stopCamera();
@@ -318,8 +336,18 @@
 
       async function verifyFaceWithAPI(imageBase64) {
         try {
+          // Show notification when sending API request
+          showNotification("info", "API so'rov yuborilmoqda...");
+
           const result = await window.electronAPI.verifyFace(imageBase64);
           const success = result.success_face === 1;
+
+          // Hide notification after receiving response
+          const notificationElement = document.getElementById("notification");
+          if (notificationElement) {
+            notificationElement.classList.add("hidden");
+            notificationElement.style.display = "none";
+          }
 
           if (success) {
             stopCamera();
@@ -500,6 +528,9 @@
       }
 
       function showNotification(type, message) {
+        const notification = document.getElementById("notification");
+        if (!notification) return;
+
         const notificationIcon =
           notification.querySelector(".notification-icon");
         const notificationMessage = notification.querySelector(
@@ -521,12 +552,7 @@
         notificationMessage.textContent = message;
 
         notification.classList.remove("hidden");
-
-        if (type !== "error") {
-          setTimeout(() => {
-            notification.classList.add("hidden");
-          }, 5000);
-        }
+        notification.style.display = "flex";
       }
 
       window.addEventListener("beforeunload", () => {
