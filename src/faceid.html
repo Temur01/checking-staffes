@@ -245,11 +245,22 @@
             welcomeMessage.textContent = "Xush kelibsiz";
 
             const fullnameDisplay = document.createElement("p");
+            const timeDisplay = document.createElement("p");
             fullnameDisplay.className = "fullname-display";
             fullnameDisplay.textContent = `F.I.O: ${result.fullname || ""}`;
+            timeDisplay.className = "time-display";
+            timeDisplay.textContent = `Ishga kelgan vaqt: ${new Date().toLocaleTimeString(
+              [],
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              },
+            )}`;
 
             welcomeContainer.appendChild(welcomeMessage);
             welcomeContainer.appendChild(fullnameDisplay);
+            welcomeContainer.appendChild(timeDisplay);
 
             const card = document.querySelector(".card");
             card.appendChild(welcomeContainer);
