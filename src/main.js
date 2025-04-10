@@ -4,7 +4,7 @@ const os = require("os");
 const axios = require("axios");
 
 let mainWindow;
-let currentPage = "welcome";
+let currentPage = "faceid";
 const API_URL = "https://nazorat.argos.uz/api";
 
 function getEthernetMacAddress() {
@@ -42,7 +42,7 @@ function createMainWindow() {
     alwaysOnTop: true,
   });
 
-  loadPage("welcome");
+  loadPage("faceid");
 
   mainWindow.webContents.on("will-navigate", (event, url) => {
     if (!url.startsWith("file://")) {
@@ -141,7 +141,7 @@ ipcMain.handle("go-to-faceid", () => {
 });
 
 ipcMain.handle("go-to-welcome", () => {
-  loadPage("welcome");
+  loadPage("faceid");
   return true;
 });
 
@@ -166,7 +166,7 @@ ipcMain.handle("verify-face", async (event, imageBase64) => {
 
 ipcMain.handle("verification-success", () => {
   setTimeout(() => {
-    loadPage("welcome");
+    loadPage("faceid");
   }, 2000);
   return true;
 });
