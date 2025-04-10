@@ -111,6 +111,7 @@
       let faceDetectionInterval = null;
       let verificationAttempts = 0;
       const MAX_VERIFICATION_ATTEMPTS = 3;
+      let isUserComingIn = true;
 
       document.addEventListener("DOMContentLoaded", () => {
         startButton.addEventListener("click", startFaceDetection);
@@ -118,8 +119,27 @@
         otherPersonButton.addEventListener("click", switchToOtherPerson);
         backButton.addEventListener("click", goBack);
 
+        checkUserStatus();
+
         checkCameraPermission();
       });
+
+      async function checkUserStatus() {
+        try {
+          const response = await window.electronAPI.checkTodayIsComing();
+
+          if (response && response.data === true) {
+            isUserComingIn = false;
+            startButton.querySelector("span").textContent = "Chiqish";
+          } else {
+            isUserComingIn = true;
+            startButton.querySelector("span").textContent = "Kirish";
+          }
+        } catch {
+          isUserComingIn = true;
+          startButton.querySelector("span").textContent = "Kirish";
+        }
+      }
 
       async function checkCameraPermission() {
         try {

@@ -10,4 +10,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   verifyFace: (imageBase64) => ipcRenderer.invoke("verify-face", imageBase64),
   verificationSuccess: () => ipcRenderer.invoke("verification-success"),
+
+  checkTodayIsComing: () => ipcRenderer.invoke("check-today-is-coming"),
 });

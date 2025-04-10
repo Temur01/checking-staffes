@@ -152,12 +152,25 @@ ipcMain.handle("verify-face", async (event, imageBase64) => {
     if (response.data.success_face === 1) {
       setTimeout(() => {
         app.quit();
-      }, 5000);
+      }, 4000);
     }
 
     return response.data;
   } catch {
     return { success: false, message: "Tekshirishda xatolik yuz berdi" };
+  }
+});
+
+ipcMain.handle("check-today-is-coming", async () => {
+  try {
+    const macAddress = getEthernetMacAddress();
+    const response = await axios.get(`${API_URL}/today-is-coming`, {
+      params: { mac: macAddress },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error checking today-is-coming:", error);
+    return { message: "Error", data: false };
   }
 });
 
