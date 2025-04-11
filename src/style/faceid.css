@@ -465,6 +465,7 @@ body {
   max-width: 500px;
   overflow: hidden;
   animation: modalFadeIn 0.3s ease-out;
+  margin: auto;
 }
 
 @keyframes modalFadeIn {

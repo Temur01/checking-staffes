@@ -77,10 +77,10 @@
             <i class="fas fa-user-plus"></i>
             <span>Boshqa odam</span>
           </button>
-          <button id="back-button" class="button secondary-button">
+          <!-- <button id="back-button" class="button secondary-button">
             <i class="fas fa-arrow-left"></i>
             <span>Orqaga</span>
-          </button>
+          </button> -->
         </div>
 
         <div class="instructions">
@@ -128,7 +128,8 @@
       const startButton = document.getElementById("start-button");
       const retryButton = document.getElementById("retry-button");
       const otherPersonButton = document.getElementById("other-person-button");
-      const backButton = document.getElementById("back-button");
+      // Make backButton optional so it doesn't break when removed
+      let backButton = document.getElementById("back-button");
       const cameraStatus = document.getElementById("camera-status");
       const faceStatus = document.getElementById("face-status");
       const verificationStatus = document.getElementById("verification-status");
@@ -148,7 +149,12 @@
         startButton.addEventListener("click", startFaceDetection);
         retryButton.addEventListener("click", retryFaceDetection);
         otherPersonButton.addEventListener("click", showOtherPersonModal);
-        backButton.addEventListener("click", goBack);
+
+        // Check if backButton exists before adding event listener
+        if (backButton) {
+          backButton.addEventListener("click", goBack);
+        }
+
         confirmOtherUserBtn.addEventListener("click", confirmOtherPerson);
         cancelOtherUserBtn.addEventListener("click", cancelOtherPerson);
 
@@ -488,15 +494,24 @@
       }
 
       function showOtherPersonModal() {
-        otherUserModal.classList.remove("hidden");
+        if (otherUserModal) {
+          otherUserModal.classList.remove("hidden");
+          otherUserModal.style.display = "flex";
+        }
       }
 
       function cancelOtherPerson() {
-        otherUserModal.classList.add("hidden");
+        if (otherUserModal) {
+          otherUserModal.classList.add("hidden");
+          otherUserModal.style.display = "none";
+        }
       }
 
       async function confirmOtherPerson() {
-        otherUserModal.classList.add("hidden");
+        if (otherUserModal) {
+          otherUserModal.classList.add("hidden");
+          otherUserModal.style.display = "none";
+        }
         try {
           showNotification(
             "info",
@@ -510,7 +525,6 @@
               "success",
               "Boshqa foydalanuvchi so'rovi yuborildi",
             );
-            // App will quit automatically from main process
           } else {
             showNotification("error", result.message || "Xatolik yuz berdi");
             fallbackToWelcomePage();
