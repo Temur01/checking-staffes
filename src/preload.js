@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   getMacAddress: () => ipcRenderer.invoke("get-mac-address"),
+
   checkMacExists: () => ipcRenderer.invoke("check-mac-exists"),
   updateUserMac: (userPin) => ipcRenderer.invoke("update-user-mac", userPin),
 
@@ -14,4 +15,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   checkTodayIsComing: () => ipcRenderer.invoke("check-today-is-coming"),
   userExit: (imageBase64) => ipcRenderer.invoke("user-exit", imageBase64),
   insertOtherUser: () => ipcRenderer.invoke("insert-other-user"),
+  getUserMonitoring: () => ipcRenderer.invoke("get-user-monitoring"),
 });

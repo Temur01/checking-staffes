@@ -212,6 +212,22 @@ ipcMain.handle("insert-other-user", async () => {
   }
 });
 
+ipcMain.handle("get-user-monitoring", async () => {
+  try {
+    const macAddress = getEthernetMacAddress();
+    const response = await axios.get(`${API_URL}/user-monitoring-info`, {
+      params: { mac: macAddress },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching monitoring data:", error);
+    return {
+      success: false,
+      message: "Monitoring ma'lumotlarini olishda xatolik",
+    };
+  }
+});
+
 ipcMain.handle("verification-success", () => {
   setTimeout(() => {
     loadPage("faceid");
