@@ -13,248 +13,20 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <style>
-      /* Additional styles for monitoring table */
-      .monitoring-data-container {
-        transition: all 0.3s ease;
-        max-height: 28vh;
-        overflow-y: auto;
-      }
-
-      .table-container {
-        background-color: white;
-        overflow: hidden;
-      }
-
-      #monitoring-table {
-        width: 100%;
-      }
-
-      #monitoring-table tr:hover {
-        background-color: #f9fafb;
-      }
-
-      .status-badge {
-        transition: all 0.2s ease;
-      }
-
-      #refresh-monitoring:hover {
-        background-color: #e5e7eb;
-      }
-
-      /* Animate row insertions */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      #monitoring-table-body tr {
-        animation: fadeIn 0.3s ease-out forwards;
-      }
-
-      /* Height constraints for main components */
-      .container {
-        max-height: 95vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-
-      .card {
-        max-height: 90vh;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .camera-container {
-        height: auto;
-        flex-shrink: 0;
-      }
-
-      .camera-frame {
-        height: 32vh !important;
-        min-height: 220px;
-      }
-
-      .face-outline {
-        width: 320px !important;
-        height: 320px !important;
-      }
-
-      .face-outline svg {
-        width: 320px;
-        height: 320px;
-      }
-
-      .instructions {
-        font-size: 0.9rem;
-        padding: 8px 12px;
-      }
-
-      .instructions h3 {
-        margin: 6px 0;
-        font-size: 1rem;
-      }
-
-      .instructions ul {
-        margin: 6px 0;
-        padding-left: 20px;
-      }
-
-      .controls {
-        margin: 12px 0 !important;
-      }
-
-      .status-container {
-        flex-wrap: wrap;
-        margin-top: 10px !important;
-      }
-
-      .status-indicator {
-        padding: 8px 10px !important;
-        font-size: 0.9rem;
-      }
-
-      /* Scrollbar styling */
-      .monitoring-data-container::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      .monitoring-data-container::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-
-      .monitoring-data-container::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 3px;
-      }
-
-      .monitoring-data-container::-webkit-scrollbar-thumb:hover {
-        background: #aaa;
-      }
-
-      /* Additional welcome container styles for compact display */
-      .welcome-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-
-      .success-icon {
-        font-size: 36px;
-        color: #1e3a8a;
-        margin-bottom: 10px;
-      }
-
-      .info-container {
-        margin-top: 10px;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .info-item {
-        display: flex;
-        align-items: center;
-        padding: 8px 12px;
-        background-color: #f9fafb;
-        border-radius: 6px;
-        font-size: 14px;
-      }
-
-      .info-icon {
-        margin-right: 8px;
-        color: #4b5563;
-      }
-
-      .info-label {
-        font-weight: 500;
-        margin-right: 5px;
-        color: #4b5563;
-      }
-
-      .info-value {
-        color: #1f2937;
-      }
-    </style>
   </head>
   <body>
     <div class="background"></div>
 
     <div class="container">
-      <div
-        class="card"
-        style="
-          border-radius: 12px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-          max-width: 800px;
-          width: 92%;
-        "
-      >
-        <div
-          class="header"
-          style="
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap: 25px;
-            padding: 10px 0;
-            margin-bottom: 15px;
-          "
-        >
-          <img
-            src="asset/logo_uz.png"
-            alt="Logo"
-            class="logo"
-            style="margin-bottom: 0; max-width: 120px"
-          />
-          <h1
-            class="title"
-            style="
-              margin: 0;
-              font-size: 26px;
-              font-weight: 600;
-              color: #1e3a8a;
-              letter-spacing: 0.5px;
-            "
-          >
-            Yuz orqali identifikatsiya
-          </h1>
+      <div class="card">
+        <div class="header">
+          <img src="asset/logo_uz.png" alt="Logo" class="logo" />
+          <h1 class="title">Yuz orqali identifikatsiya</h1>
         </div>
 
-        <div class="camera-container" style="width: 100%">
-          <div
-            class="camera-frame"
-            style="
-              border: 2px solid #e5e7eb;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-              height: 380px;
-              position: relative;
-              overflow: hidden;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-            "
-          >
-            <div
-              class="face-outline"
-              style="
-                width: 320px;
-                height: 320px;
-                position: absolute;
-                z-index: 10;
-              "
-            >
+        <div class="camera-container">
+          <div class="camera-frame">
+            <div class="face-outline">
               <svg width="400" height="400" viewBox="0 0 400 400">
                 <path
                   d="M200,40 C120,40 40,120 40,200 C40,280 120,360 200,360 C280,360 360,280 360,200 C360,120 280,40 200,40 Z"
@@ -266,32 +38,10 @@
                 />
               </svg>
             </div>
-            <video
-              id="video"
-              autoplay
-              playsinline
-              style="
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                position: absolute;
-              "
-            ></video>
-            <canvas
-              id="canvas"
-              class="hidden"
-              style="width: 100%; height: 100%"
-            ></canvas>
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" class="hidden"></canvas>
           </div>
-          <div
-            class="instructions"
-            style="
-              margin-top: 15px;
-              border-radius: 6px;
-              background-color: #f3f4f6;
-              border-left: 4px solid #1e3a8a;
-            "
-          >
+          <div class="instructions">
             <h3><i class="fas fa-info-circle"></i> Ko'rsatmalar</h3>
             <ul>
               <li>Yuzingizni kamera markazida saqlang</li>
@@ -301,105 +51,31 @@
           </div>
         </div>
 
-        <div
-          class="controls"
-          style="
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-          "
-        >
-          <button
-            id="start-button"
-            class="button primary-button"
-            style="
-              min-width: 130px;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-              padding: 10px 20px;
-              font-size: 15px;
-            "
-          >
+        <div class="controls">
+          <button id="start-button" class="button primary-button">
             <i class="fas fa-play"></i>
             <span>Kirish</span>
           </button>
-          <button
-            id="retry-button"
-            class="button secondary-button hidden"
-            style="
-              min-width: 130px;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-              padding: 10px 20px;
-              font-size: 15px;
-            "
-          >
+          <button id="retry-button" class="button secondary-button hidden">
             <i class="fas fa-redo"></i>
             <span>Qayta urinish</span>
           </button>
-          <button
-            id="other-person-button"
-            class="button secondary-button"
-            style="
-              min-width: 130px;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-              padding: 10px 20px;
-              font-size: 15px;
-            "
-          >
+          <button id="other-person-button" class="button secondary-button">
             <i class="fas fa-user-plus"></i>
             <span>Boshqa odam</span>
           </button>
         </div>
-        <div
-          class="status-container"
-          style="
-            flex-direction: row;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 15px;
-          "
-        >
-          <div
-            class="status-indicator"
-            style="
-              flex: 1;
-              min-width: 180px;
-              border-radius: 6px;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-              padding: 10px 12px;
-            "
-          >
-            <i class="fas fa-camera status-icon" style="font-size: 16px"></i>
+        <div class="status-container">
+          <div class="status-indicator">
+            <i class="fas fa-camera status-icon"></i>
             <span class="status-text" id="camera-status">Kamera tayyor</span>
           </div>
-          <div
-            class="status-indicator"
-            style="
-              flex: 1;
-              min-width: 180px;
-              border-radius: 6px;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-              padding: 10px 12px;
-            "
-          >
-            <i class="fas fa-user status-icon" style="font-size: 16px"></i>
+          <div class="status-indicator">
+            <i class="fas fa-user status-icon"></i>
             <span class="status-text" id="face-status">Kameraga qarang</span>
           </div>
-          <div
-            class="status-indicator"
-            style="
-              flex: 1;
-              min-width: 180px;
-              border-radius: 6px;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-              padding: 10px 12px;
-            "
-          >
-            <i
-              class="fas fa-check-circle status-icon"
-              style="font-size: 16px"
-            ></i>
+          <div class="status-indicator">
+            <i class="fas fa-check-circle status-icon"></i>
             <span class="status-text" id="verification-status"
               >Tekshirilmoqda</span
             >
@@ -407,74 +83,20 @@
         </div>
 
         <!-- User Monitoring Data Table -->
-        <div
-          class="monitoring-data-container"
-          style="
-            margin-top: 15px;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 15px;
-          "
-        >
-          <div
-            class="table-container"
-            style="
-              overflow-x: auto;
-              border-radius: 8px;
-              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            "
-          >
-            <table
-              id="monitoring-table"
-              style="width: 100%; border-collapse: collapse; font-size: 13px"
-            >
+        <div class="monitoring-data-container">
+          <div class="table-container">
+            <table id="monitoring-table">
               <thead>
-                <tr
-                  style="
-                    background-color: #f3f4f6;
-                    border-bottom: 2px solid #e5e7eb;
-                  "
-                >
-                  <th
-                    style="
-                      padding: 8px 12px;
-                      text-align: left;
-                      color: #4b5563;
-                      width: 40%;
-                    "
-                  >
-                    Kirish vaqti
-                  </th>
-                  <th
-                    style="
-                      padding: 8px 12px;
-                      text-align: left;
-                      color: #4b5563;
-                      width: 40%;
-                    "
-                  >
-                    Chiqish vaqti
-                  </th>
-                  <th
-                    style="
-                      padding: 8px 12px;
-                      text-align: center;
-                      color: #4b5563;
-                      width: 20%;
-                    "
-                  >
-                    Holat
-                  </th>
+                <tr>
+                  <th>Kirish vaqti</th>
+                  <th>Chiqish vaqti</th>
+                  <th>Holat</th>
                 </tr>
               </thead>
               <tbody id="monitoring-table-body">
                 <!-- Table data will be populated by JavaScript -->
                 <tr>
-                  <td
-                    colspan="3"
-                    style="padding: 12px; text-align: center; color: #6b7280"
-                  >
-                    Ma'lumotlar yuklanmoqda...
-                  </td>
+                  <td colspan="3">Ma'lumotlar yuklanmoqda...</td>
                 </tr>
               </tbody>
             </table>
@@ -483,7 +105,7 @@
       </div>
     </div>
 
-    <div id="notification" class="notification hidden" style="display: none">
+    <div id="notification" class="notification hidden">
       <i class="notification-icon fas fa-info-circle"></i>
       <span class="notification-message"></span>
     </div>
@@ -640,7 +262,6 @@
             `;
             monitoringTableBody.appendChild(refreshRow);
 
-            // Add event listener to refresh button
             document
               .getElementById("refresh-monitoring")
               .addEventListener("click", fetchMonitoringData);
@@ -651,7 +272,6 @@
             monitoringTableBody.appendChild(row);
           }
         } catch (error) {
-          console.error("Error fetching monitoring data:", error);
           const monitoringTableBody = document.getElementById(
             "monitoring-table-body",
           );

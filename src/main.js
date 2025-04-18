@@ -7,6 +7,14 @@ let mainWindow;
 let currentPage = "faceid";
 const API_URL = "https://nazorat.argos.uz/api";
 
+// Add isQuitting property to app
+app.isQuitting = false;
+
+// Set the flag when quitting starts
+app.on("before-quit", () => {
+  app.isQuitting = true;
+});
+
 function getEthernetMacAddress() {
   const interfaces = os.networkInterfaces();
   const ifaceList = interfaces["Ethernet"];
@@ -90,7 +98,7 @@ function createMainWindow() {
 }
 
 function loadPage(pageName) {
-  if (!mainWindow) return;
+  if (!mainWindow || mainWindow.isDestroyed()) return;
 
   currentPage = pageName;
   const pagePath = path.join(__dirname, `${pageName}.html`);
@@ -150,8 +158,11 @@ ipcMain.handle("verify-face", async (event, imageBase64) => {
     });
 
     if (response.data.success_face === 1) {
+      const appIsQuitting = app.isQuitting;
       setTimeout(() => {
-        app.quit();
+        if (!appIsQuitting) {
+          app.quit();
+        }
       }, 4000);
     }
 
@@ -181,8 +192,11 @@ ipcMain.handle("user-exit", async (event, imageBase64) => {
     });
 
     if (response.data.success_face === 1) {
+      const appIsQuitting = app.isQuitting;
       setTimeout(() => {
-        app.quit();
+        if (!appIsQuitting) {
+          app.quit();
+        }
       }, 4000);
     }
 
@@ -219,8 +233,7 @@ ipcMain.handle("get-user-monitoring", async () => {
       params: { mac: macAddress },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching monitoring data:", error);
+  } catch {
     return {
       success: false,
       message: "Monitoring ma'lumotlarini olishda xatolik",
@@ -230,7 +243,9 @@ ipcMain.handle("get-user-monitoring", async () => {
 
 ipcMain.handle("verification-success", () => {
   setTimeout(() => {
-    loadPage("faceid");
+    if (!app.isQuitting && mainWindow && !mainWindow.isDestroyed()) {
+      loadPage("faceid");
+    }
   }, 2000);
   return true;
 });
