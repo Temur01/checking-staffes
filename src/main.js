@@ -11,7 +11,12 @@ const API_URL = "https://nazorat.argos.uz/api";
 app.isQuitting = false;
 
 // Set the flag when quitting starts
-app.on("before-quit", () => {
+app.on("before-quit", (event) => {
+  // Prevent the default quit behavior from Alt+F4
+  if (!app.isQuitting) {
+    event.preventDefault();
+    return;
+  }
   app.isQuitting = true;
 });
 
@@ -66,6 +71,14 @@ function createMainWindow() {
     mainWindow.focus();
   });
 
+  // Prevent window from closing with Alt+F4
+  mainWindow.on("close", (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      return false;
+    }
+  });
+
   const { globalShortcut } = require("electron");
 
   globalShortcut.register("F11", () => {
@@ -90,6 +103,12 @@ function createMainWindow() {
 
   globalShortcut.register("CommandOrControl+Shift+Tab", () => {
     return false;
+  });
+
+  globalShortcut.register("CommandOrControl+Shift+Q", () => {
+    app.isQuitting = true;
+    app.quit();
+    return true;
   });
 
   mainWindow.on("closed", () => {

@@ -14,7 +14,7 @@ win:
     - target: portable
       arch:
         - x64
-  icon: src/asset/logo_uz.png
+  icon: src/asset/logo_project.png
   artifactName: ${productName}-Portable.exe
 nsis:
   oneClick: false
