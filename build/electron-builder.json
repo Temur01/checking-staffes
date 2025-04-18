@@ -1,0 +1,7 @@
+{
+  "appId": "com.argos.faceverification",
+  "productName": "Face Verification",
+  "win": {
+    "icon": "logo_project.ico"
+  }
+} 

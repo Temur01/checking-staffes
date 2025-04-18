@@ -5,18 +5,29 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate-icons": "electron-icon-builder --input=./assets/logo_project.ico --output=./build --flatten"
   },
   "build": {
     "appId": "com.argos.faceverification",
     "productName": "Face Verification",
     "files": [
       "src/**/*",
-      "package.json"
+      "package.json",
+      "assets/**/*"
     ],
     "win": {
       "target": "nsis",
-      "artifactName": "${productName} Setup.exe"
+      "artifactName": "${productName} Setup.exe",
+      "icon": "./assets/logo_project.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/logo_project.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/logo_project.png"
     },
     "directories": {
       "output": "dist"
@@ -30,6 +41,7 @@
   "devDependencies": {
     "electron": "^35.1.4",
     "electron-builder": "^26.0.12",
+    "electron-icon-builder": "^2.0.1",
     "fs-extra": "^11.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",

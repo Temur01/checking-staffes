@@ -8,14 +8,22 @@ files:
     filter:
       - package.json
       - src/**/*
+      - assets/**/*
+      - build/**/*
 electronVersion: 35.1.4
 win:
   target:
     - target: portable
       arch:
         - x64
-  icon: src/asset/logo_uz.png
+  icon: build/logo_project.ico
   artifactName: ${productName}-Portable.exe
+mac:
+  target: dmg
+  icon: assets/logo_project.icns
+linux:
+  target: AppImage
+  icon: assets/logo_project.png
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true

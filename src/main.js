@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron");
 const path = require("path");
 const os = require("os");
 const axios = require("axios");
@@ -39,7 +39,10 @@ function createMainWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       navigateOnDragDrop: false,
+      contextIsolation: true, // Security best practice
+      nodeIntegration: false, // Security best practice
     },
+    icon: path.resolve(__dirname, "../assets/logo_project.ico"),
     autoHideMenuBar: true,
     resizable: false,
     center: true,
@@ -52,45 +55,41 @@ function createMainWindow() {
 
   loadPage("faceid");
 
+  // Prevent navigation to non-file URLs
   mainWindow.webContents.on("will-navigate", (event, url) => {
     if (!url.startsWith("file://")) {
       event.preventDefault();
     }
   });
 
+  // Prevent new windows
   mainWindow.webContents.on("new-window", (event) => {
     event.preventDefault();
   });
 
+  // Keep window focused
   mainWindow.on("blur", () => {
     mainWindow.focus();
   });
 
-  const { globalShortcut } = require("electron");
-
-  globalShortcut.register("F11", () => {
-    return false;
+  // Prevent window close unless quitting
+  mainWindow.on("close", (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+    }
   });
 
-  globalShortcut.register("Escape", () => {
-    return false;
-  });
-
-  globalShortcut.register("Alt+Tab", () => {
-    return false;
-  });
-
+  // Register global shortcuts to block
   globalShortcut.register("Alt+F4", () => {
+    console.log("Alt+F4 blocked");
     return false;
   });
-
-  globalShortcut.register("CommandOrControl+Tab", () => {
-    return false;
-  });
-
-  globalShortcut.register("CommandOrControl+Shift+Tab", () => {
-    return false;
-  });
+  globalShortcut.register("F11", () => false);
+  globalShortcut.register("Escape", () => false);
+  globalShortcut.register("Alt+Tab", () => false);
+  globalShortcut.register("CommandOrControl+Tab", () => false);
+  globalShortcut.register("CommandOrControl+Shift+Tab", () => false);
+  globalShortcut.register("CommandOrControl+Q", () => false);
 
   mainWindow.on("closed", () => {
     globalShortcut.unregisterAll();
@@ -105,6 +104,7 @@ function loadPage(pageName) {
   mainWindow.loadFile(pagePath);
 }
 
+// IPC Handlers
 ipcMain.handle("get-mac-address", async () => {
   return getEthernetMacAddress();
 });
@@ -146,7 +146,7 @@ ipcMain.handle("go-to-faceid", () => {
 });
 
 ipcMain.handle("go-to-welcome", () => {
-  loadPage("faceid");
+  loadPage("welcome");
   return true;
 });
 
