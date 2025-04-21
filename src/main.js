@@ -1,19 +1,32 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  globalShortcut,
+  dialog,
+} = require("electron");
 const path = require("path");
 const os = require("os");
 const axios = require("axios");
 
 let mainWindow;
-let currentPage = "faceid";
 const API_URL = "https://nazorat.argos.uz/api";
+const APP_VERSION = "2.0-version";
 
-// Add isQuitting property to app
 app.isQuitting = false;
 
-// Set the flag when quitting starts
 app.on("before-quit", () => {
   app.isQuitting = true;
 });
+
+async function checkAppVersion() {
+  try {
+    const response = await axios.get(`${API_URL}/check-version/${APP_VERSION}`);
+    return response.data.current_version === true;
+  } catch {
+    return true;
+  }
+}
 
 function getEthernetMacAddress() {
   const interfaces = os.networkInterfaces();
@@ -53,33 +66,33 @@ function createMainWindow() {
     alwaysOnTop: true,
   });
 
-  loadPage("faceid");
+  checkAppVersion().then((isCurrentVersion) => {
+    if (isCurrentVersion) {
+      loadPage("faceid");
+    } else {
+      showVersionErrorDialog();
+    }
+  });
 
-  // Prevent navigation to non-file URLs
   mainWindow.webContents.on("will-navigate", (event, url) => {
     if (!url.startsWith("file://")) {
       event.preventDefault();
     }
   });
 
-  // Prevent new windows
   mainWindow.webContents.on("new-window", (event) => {
     event.preventDefault();
   });
 
-  // Keep window focused
   mainWindow.on("blur", () => {
     mainWindow.focus();
   });
-
-  // Prevent window close unless quitting
   mainWindow.on("close", (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
     }
   });
 
-  // Register global shortcuts to block
   globalShortcut.register("Alt+F4", () => {
     console.log("Alt+F4 blocked");
     return false;
@@ -96,6 +109,93 @@ function createMainWindow() {
   });
 }
 
+function showVersionErrorDialog() {
+  const modalWindow = new BrowserWindow({
+    width: 450,
+    height: 200,
+    parent: mainWindow,
+    modal: true,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    title: "Eski versiya",
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  modalWindow.setMenu(null);
+
+  let htmlContent = `
+    <html>
+    <head>
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 0;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          height: calc(100vh - 40px);
+          background-color: #f5f5f5;
+        }
+        .message {
+          flex-grow: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          font-size: 16px;
+        }
+        .button-container {
+          display: flex;
+          justify-content: center;
+          padding: 10px 0;
+        }
+        button {
+          background-color: #0078d7;
+          color: white;
+          border: none;
+          padding: 8px 30px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+        button:hover {
+          background-color: #00559e;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="message">
+        Sizda eski versiya, versiyangizni yangilab olishingiz kerak, texnik bo'limga murojaat qiling!
+      </div>
+      <div class="button-container">
+        <button id="okButton">OK</button>
+      </div>
+      <script>
+        document.getElementById('okButton').addEventListener('click', () => {
+          window.close();
+        });
+      </script>
+    </body>
+    </html>
+  `;
+
+  modalWindow.loadURL(
+    "data:text/html;charset=utf-8," + encodeURIComponent(htmlContent),
+  );
+
+  modalWindow.once("closed", () => {
+    app.isQuitting = true;
+    setTimeout(() => {
+      app.exit(0);
+    }, 100);
+  });
+}
+
 function loadPage(pageName) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
 
@@ -107,6 +207,10 @@ function loadPage(pageName) {
 // IPC Handlers
 ipcMain.handle("get-mac-address", async () => {
   return getEthernetMacAddress();
+});
+
+ipcMain.handle("check-app-version", async () => {
+  return await checkAppVersion();
 });
 
 ipcMain.handle("check-mac-exists", async () => {

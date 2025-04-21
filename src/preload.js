@@ -16,4 +16,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   userExit: (imageBase64) => ipcRenderer.invoke("user-exit", imageBase64),
   insertOtherUser: () => ipcRenderer.invoke("insert-other-user"),
   getUserMonitoring: () => ipcRenderer.invoke("get-user-monitoring"),
+
+  checkAppVersion: () => ipcRenderer.invoke("check-app-version"),
 });
