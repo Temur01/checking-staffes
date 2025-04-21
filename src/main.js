@@ -39,8 +39,8 @@ function createMainWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       navigateOnDragDrop: false,
-      contextIsolation: true, // Security best practice
-      nodeIntegration: false, // Security best practice
+      contextIsolation: true,
+      nodeIntegration: false,
     },
     icon: path.resolve(__dirname, "../assets/logo_project.ico"),
     autoHideMenuBar: true,

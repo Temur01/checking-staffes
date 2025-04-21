@@ -133,6 +133,21 @@
       </div>
     </div>
 
+    <style>
+      .active-retry-button {
+        background-color: #2563eb !important;
+        color: white !important;
+        border-color: #1d4ed8 !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3) !important;
+        transform: translateY(-1px) !important;
+        transition: all 0.2s ease !important;
+      }
+
+      .active-retry-button:hover {
+        background-color: #1d4ed8 !important;
+      }
+    </style>
+
     <script>
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
@@ -356,14 +371,18 @@
           updateStatus("face", "processing", "Yuz aniqlanmoqda...");
 
           simulateFaceDetection();
-        } catch {
+        } catch (error) {
+          console.error("Camera error:", error);
           updateStatus("camera", "error", "Kameraga ulanishda xatolik");
           showNotification(
             "error",
             "Kameraga ulanib bo'lmadi. Ruxsatlarni tekshiring.",
           );
-          startButton.classList.remove("hidden");
-          retryButton.classList.add("hidden");
+
+          // Completely remove start button and show retry button with active style
+          startButton.style.display = "none";
+          retryButton.classList.remove("hidden");
+          retryButton.classList.add("active-retry-button");
         }
       }
 
@@ -405,8 +424,14 @@
           } else {
             userExitWithAPI(imageBase64);
           }
-        } catch {
+        } catch (error) {
+          console.error("Image capture error:", error);
           verifyFace(false, "Rasmni olishda xatolik yuz berdi");
+
+          // Completely remove start button and show retry button with active style
+          startButton.style.display = "none";
+          retryButton.classList.remove("hidden");
+          retryButton.classList.add("active-retry-button");
         }
       }
 
@@ -481,8 +506,14 @@
           }
 
           verifyFace(success, result.message);
-        } catch {
+        } catch (error) {
+          console.error("API error:", error);
           verifyFace(false, "API bilan bog'lanishda xatolik");
+
+          // Completely remove start button and show retry button with active style
+          startButton.style.display = "none";
+          retryButton.classList.remove("hidden");
+          retryButton.classList.add("active-retry-button");
         }
       }
 
@@ -557,8 +588,14 @@
           }
 
           verifyFace(success, result.message);
-        } catch {
+        } catch (error) {
+          console.error("API error:", error);
           verifyFace(false, "API bilan bog'lanishda xatolik");
+
+          // Completely remove start button and show retry button with active style
+          startButton.style.display = "none";
+          retryButton.classList.remove("hidden");
+          retryButton.classList.add("active-retry-button");
         }
       }
 
@@ -577,6 +614,11 @@
           }, 2000);
         } else {
           updateStatus("verification", "error", "Tekshiruv muvaffaqiyatsiz");
+
+          // Completely remove start button and show retry button with active style
+          startButton.style.display = "none";
+          retryButton.classList.remove("hidden");
+          retryButton.classList.add("active-retry-button");
 
           if (verificationAttempts >= MAX_VERIFICATION_ATTEMPTS) {
             showNotification(
@@ -604,6 +646,10 @@
         updateStatus("verification", "waiting", "Tekshirilmoqda");
 
         notification.classList.add("hidden");
+
+        // Reset start button state - keep it hidden during retry attempts
+        startButton.style.display = "none";
+        retryButton.classList.add("active-retry-button");
 
         isProcessing = false;
         startFaceDetection();
@@ -660,7 +706,11 @@
         stopCamera();
         verificationAttempts = 0;
 
+        // Reset all button states
+        startButton.style.display = "";
         startButton.classList.remove("hidden");
+        startButton.disabled = false;
+        retryButton.classList.remove("active-retry-button");
         retryButton.classList.add("hidden");
 
         updateStatus("camera", "waiting", "Kamera ishga tushirilmoqda...");
