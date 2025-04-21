@@ -11,7 +11,7 @@ const axios = require("axios");
 
 let mainWindow;
 const API_URL = "https://nazorat.argos.uz/api";
-const APP_VERSION = "2.0-version";
+const APP_VERSION = "1.0-version";
 
 app.isQuitting = false;
 
